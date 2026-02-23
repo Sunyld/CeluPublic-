@@ -12,6 +12,7 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: Request) {
     try {
         const supabase = await createClient()
+        if (!supabase) return NextResponse.json({ error: 'Supabase não configurado' }, { status: 503 })
         const { data: { user }, error: authError } = await supabase.auth.getUser()
 
         if (authError || !user) {

@@ -52,7 +52,7 @@ function dataUrlToBuffer(dataUrl: string): { buffer: Buffer; ext: string } {
     return { buffer: Buffer.from(base64, 'base64'), ext }
 }
 
-async function ensureApprovedSeller(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
+async function ensureApprovedSeller(supabase: import('@supabase/supabase-js').SupabaseClient, userId: string) {
     const { data: rpc } = await supabase.rpc('is_admin', { uid: userId })
     if (rpc === true) return { ok: true, isAdmin: true }
 
@@ -79,6 +79,7 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
     try {
         const supabase = await createClient()
+        if (!supabase) return NextResponse.json({ error: 'Supabase não configurado' }, { status: 503 })
         const { data: { user }, error: authError } = await supabase.auth.getUser()
 
         if (authError || !user) {
@@ -127,6 +128,7 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const supabase = await createClient()
+        if (!supabase) return NextResponse.json({ error: 'Supabase não configurado' }, { status: 503 })
         const { data: { user }, error: authError } = await supabase.auth.getUser()
 
         if (authError || !user) {

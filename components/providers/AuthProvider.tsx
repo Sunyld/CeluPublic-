@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const currentAttemptIdRef = useRef<string>(generateAuthAttemptId());
     const repo = getUsersRepo();
-    const supabase = useMemo(() => createClient(), []);
+    const supabase = useMemo(() => createClient(), []); // null when env vars missing (e.g. build/prerender)
 
     const lastHandledUserIdRef = useRef<string | null>(null);
     const ensureProfileCacheRef = useRef<Map<string, Promise<User | null>>>(new Map());
@@ -184,7 +184,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 
     useEffect(() => {
-        if (!USE_SUPABASE) return;
+        if (!USE_SUPABASE || !supabase) {
+            if (USE_SUPABASE && !supabase) setAuthStatus('anonymous');
+            return;
+        }
 
         let cancelled = false;
 
@@ -234,6 +237,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [supabase, ensureProfileForSupabaseUser]);
 
     const login = useCallback(async (email: string, password: string) => {
+        if (!supabase) return null;
         setAuthStatus('authenticating');
         const { data, error } = await supabase.auth.signInWithPassword({
             email: email.trim().toLowerCase(),
@@ -250,6 +254,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [supabase, ensureProfileForSupabaseUser]);
 
     const loginWithGoogle = useCallback(async () => {
+        if (!supabase) return;
         const redirectTo = `${window.location.origin}/auth/callback`;
         await supabase.auth.signInWithOAuth({
             provider: 'google',
@@ -264,6 +269,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [supabase]);
 
     const logout = useCallback(async () => {
+        if (!supabase) return;
         await supabase.auth.signOut();
         setProfileUser(null);
         setAuthStatus('anonymous');
@@ -271,6 +277,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [supabase]);
 
     const register = useCallback(async (payload: RegisterPayload) => {
+        if (!supabase) return null;
         const { data, error } = await supabase.auth.signUp({
             email: payload.email,
             password: payload.password,
@@ -312,6 +319,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [supabase]);
 
     const refreshProfile = useCallback(async () => {
+        if (!supabase) return;
         const { data: { user: sbUser } } = await supabase.auth.getUser();
         if (!sbUser) return;
         try {

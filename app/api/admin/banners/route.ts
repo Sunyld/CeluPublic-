@@ -27,6 +27,7 @@ function rowToBanner(row: { id: string; title: string; image_path: string; link:
 export async function GET() {
   try {
     const supabase = await createClient();
+    if (!supabase) return NextResponse.json({ error: 'Supabase não configurado' }, { status: 503 });
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
@@ -55,6 +56,7 @@ export async function POST(request: Request) {
     try {
         // 1. Verify user is Admin
         const supabase = await createClient();
+        if (!supabase) return NextResponse.json({ error: 'Supabase não configurado' }, { status: 503 });
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {
@@ -161,6 +163,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
     try {
         const supabase = await createClient();
+        if (!supabase) return NextResponse.json({ error: 'Supabase não configurado' }, { status: 503 });
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {

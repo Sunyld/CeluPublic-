@@ -36,6 +36,7 @@ export async function DELETE(
     }
 
     const supabase = await createClient()
+    if (!supabase) return NextResponse.json({ error: 'Supabase não configurado' }, { status: 503 })
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {

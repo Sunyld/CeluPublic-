@@ -17,7 +17,7 @@ function buildPublicUrl(path: string): string {
     return `${url}/storage/v1/object/public/${BUCKET}/${clean}`
 }
 
-async function ensureOwnerOrAdmin(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, ownerId: string) {
+async function ensureOwnerOrAdmin(supabase: import('@supabase/supabase-js').SupabaseClient, userId: string, ownerId: string) {
     if (userId === ownerId) return true
     const { data } = await supabase.rpc('is_admin', { uid: userId })
     if (data === true) return true
@@ -59,6 +59,7 @@ export async function GET(
         if (!id) return NextResponse.json({ error: 'id obrigatório' }, { status: 400 })
 
         const supabase = await createClient()
+        if (!supabase) return NextResponse.json({ error: 'Supabase não configurado' }, { status: 503 })
         const { data: { user }, error: authError } = await supabase.auth.getUser()
 
         if (authError || !user) {
@@ -124,6 +125,7 @@ export async function PATCH(
         if (!id) return NextResponse.json({ error: 'id obrigatório' }, { status: 400 })
 
         const supabase = await createClient()
+        if (!supabase) return NextResponse.json({ error: 'Supabase não configurado' }, { status: 503 })
         const { data: { user }, error: authError } = await supabase.auth.getUser()
 
         if (authError || !user) {
@@ -271,6 +273,7 @@ export async function DELETE(
         }
 
         const supabase = await createClient()
+        if (!supabase) return NextResponse.json({ error: 'Supabase não configurado' }, { status: 503 })
         const { data: { user }, error: authError } = await supabase.auth.getUser()
 
         if (authError || !user) {

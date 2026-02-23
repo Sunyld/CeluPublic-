@@ -1,11 +1,12 @@
 /**
  * Admin categorias: PATCH (editar) e DELETE (apagar)
  */
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 
-async function ensureAdmin(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
+async function ensureAdmin(supabase: SupabaseClient, userId: string) {
     const { data } = await supabase.rpc('is_admin', { uid: userId })
     if (data === true) return true
     const { data: p } = await supabase.from('profiles').select('role').eq('id', userId).maybeSingle()
@@ -20,6 +21,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         if (!id) return NextResponse.json({ error: 'id obrigatório' }, { status: 400 })
 
         const supabase = await createClient()
+        if (!supabase) return NextResponse.json({ error: 'Supabase não configurado' }, { status: 503 })
         const { data: { user }, error: authError } = await supabase.auth.getUser()
 
         if (authError || !user) {
@@ -72,6 +74,7 @@ export async function DELETE(
         if (!id) return NextResponse.json({ error: 'id obrigatório' }, { status: 400 })
 
         const supabase = await createClient()
+        if (!supabase) return NextResponse.json({ error: 'Supabase não configurado' }, { status: 503 })
         const { data: { user }, error: authError } = await supabase.auth.getUser()
 
         if (authError || !user) {

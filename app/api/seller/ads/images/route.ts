@@ -9,6 +9,7 @@ export async function POST(request: Request) {
     try {
         // 1. Authenticate user
         const supabase = await createClient();
+        if (!supabase) return NextResponse.json({ error: 'Supabase não configurado' }, { status: 503 });
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {
@@ -93,6 +94,7 @@ export async function POST(request: Request) {
 export async function DELETE(request: Request) {
     try {
         const supabase = await createClient();
+        if (!supabase) return NextResponse.json({ error: 'Supabase não configurado' }, { status: 503 });
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {

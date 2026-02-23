@@ -49,6 +49,10 @@ export default function AuthCallback() {
         ranRef.current = true;
 
         const supabase = createClient();
+        if (!supabase) {
+            setError('Supabase não configurado. Configure NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY.');
+            return;
+        }
 
         const handleCallback = async () => {
             try {

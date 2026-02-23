@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-async function ensureAdmin(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
+async function ensureAdmin(supabase: import('@supabase/supabase-js').SupabaseClient, userId: string) {
     const { data } = await supabase.rpc('is_admin', { uid: userId })
     if (data === true) return true
     const { data: p } = await supabase.from('profiles').select('role').eq('id', userId).maybeSingle()
@@ -20,6 +20,7 @@ async function ensureAdmin(supabase: Awaited<ReturnType<typeof createClient>>, u
 export async function GET() {
     try {
         const supabase = await createClient()
+        if (!supabase) return NextResponse.json({ error: 'Supabase não configurado' }, { status: 503 })
         const { data: { user }, error: authError } = await supabase.auth.getUser()
 
         if (authError || !user) {
