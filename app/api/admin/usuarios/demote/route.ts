@@ -1,0 +1,73 @@
+/**
+ * POST /api/admin/usuarios/demote
+ * Remover cargo de admin (voltar para seller). Impede remover admin principal.
+ */
+import { NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
+
+async function ensureAdmin(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
+    const { data } = await supabase.rpc('is_admin', { uid: userId })
+    if (data === true) return true
+    const { data: p } = await supabase.from('profiles').select('role').eq('id', userId).maybeSingle()
+    return p?.role === 'admin'
+}
+
+const PROTECTED_EMAILS = ['celupublic@gmail.com', 'sunyldjosesomailamatapa@gmail.com'].map((e) => e.toLowerCase())
+
+export const dynamic = 'force-dynamic'
+
+export async function POST(request: Request) {
+    try {
+        const supabase = await createClient()
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
+            return NextResponse.json({ ok: false, message: 'Não autenticado' }, { status: 401 })
+        }
+
+        if (!(await ensureAdmin(supabase, user.id))) {
+            return NextResponse.json({ ok: false, message: 'Acesso negado' }, { status: 403 })
+        }
+
+        const body = await request.json().catch(() => ({}))
+        const targetUserId = body?.userId ?? body?.id
+        if (!targetUserId || typeof targetUserId !== 'string') {
+            return NextResponse.json({ ok: false, message: 'userId obrigatório' }, { status: 400 })
+        }
+
+        const admin = createAdminClient()
+        const { data: authUser } = await admin.auth.admin.getUserById(targetUserId)
+        const targetEmail = (authUser?.user?.email ?? '').toLowerCase()
+        if (PROTECTED_EMAILS.includes(targetEmail)) {
+            return NextResponse.json(
+                { ok: false, message: 'Não é permitido remover o administrador principal.' },
+                { status: 403 }
+            )
+        }
+
+        const { data: profile, error: profileErr } = await admin
+            .from('profiles')
+            .update({ role: 'seller' })
+            .eq('id', targetUserId)
+            .select()
+            .single()
+
+        if (profileErr) {
+            console.error('[API/ADMIN/USUARIOS/DEMOTE] error:', profileErr.message, profileErr.code)
+            return NextResponse.json(
+                { ok: false, message: profileErr.message ?? 'Erro ao remover admin' },
+                { status: 500 }
+            )
+        }
+
+        console.log('[API/ADMIN/USUARIOS/DEMOTE] userId:', targetUserId.slice(0, 8), 'by:', user.id.slice(0, 8))
+        return NextResponse.json({ ok: true, profile })
+    } catch (err: unknown) {
+        console.error('[API/ADMIN/USUARIOS/DEMOTE] unexpected error:', err)
+        return NextResponse.json(
+            { ok: false, message: err instanceof Error ? err.message : 'Erro interno' },
+            { status: 500 }
+        )
+    }
+}

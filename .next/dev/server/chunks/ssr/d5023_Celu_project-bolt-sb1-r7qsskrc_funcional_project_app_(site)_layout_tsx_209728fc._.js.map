@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///D:/PROJECTOS/Reactjs/Celu/project-bolt-sb1-r7qsskrc/funcional/project/app/%28site%29/layout.tsx"],"sourcesContent":["import { Header } from '@/components/layout/Header'\r\nimport { Footer } from '@/components/layout/Footer'\r\n\r\nexport default function SiteLayout({\r\n    children,\r\n}: {\r\n    children: React.ReactNode\r\n}) {\r\n    return (\r\n        <div className=\"flex min-h-screen flex-col\">\r\n            <Header />\r\n            <main className=\"flex-1\">{children}</main>\r\n            <Footer />\r\n        </div>\r\n    )\r\n}\r\n"],"names":[],"mappings":";;;;;AAAA;AACA;;;;AAEe,SAAS,WAAW,EAC/B,QAAQ,EAGX;IACG,qBACI,+TAAC;QAAI,WAAU;;0BACX,+TAAC,0NAAM;;;;;0BACP,+TAAC;gBAAK,WAAU;0BAAU;;;;;;0BAC1B,+TAAC,0NAAM;;;;;;;;;;;AAGnB"}}]
+}

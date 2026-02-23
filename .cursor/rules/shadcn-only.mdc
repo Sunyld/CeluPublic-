@@ -1,0 +1,13 @@
+---
+description: Use only shadcn/ui primitives; no custom Button/Card or other UI kits
+alwaysApply: true
+---
+
+# UI: Apenas shadcn/ui
+
+- **Não criar** componentes Button ou Card fora de `src/components/ui/`. Os únicos Button e Card do projeto são os primitivos shadcn em `@/components/ui/button` e `@/components/ui/card`.
+- **Sempre** usar os primitivos shadcn para UI: importar de `@/components/ui/*` (Button, Card, Badge, Input, Label, etc.).
+- **Compor variantes** apenas via `className` (e props de variante do próprio componente, ex.: `variant`, `size` do Button). Não criar wrappers que reimplementem estilos de botão/cartão.
+- **Não introduzir** outros UI kits (MUI, Chakra, Ant Design, etc.). Ícones: usar `lucide-react`; estilos: Tailwind + primitivos shadcn.
+
+Componentes de domínio (ex.: `MarketplaceAdCard`, `CategoryCard`, `Banner`) devem apenas **compor** layout (div, Link, img) e usar **exclusivamente** os componentes de `@/components/ui` com `className` para ajustes visuais.
