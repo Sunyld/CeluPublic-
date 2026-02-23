@@ -80,30 +80,26 @@ export const usersRepoSupabase: UsersRepository = {
       if (error) {
         // Only log real errors (not "not found" - that's handled by data === null)
         if (error.code !== 'PGRST116') {
-          // eslint-disable-next-line no-console
-          console.error('[SUPABASE ERROR][usersRepo.getById]', {
-            code: error.code,
-            message: error.message,
-            details: error.details,
-          });
-        }
-        return null;
-      }
-      
-      // data === null means profile doesn't exist yet (expected during signup)
-      if (!data) {
-        return null;
-      }
           // Check for RLS recursion error (42P17)
           if (error.code === '42P17' || error.message?.includes('recursion') || error.message?.includes('infinite')) {
             // eslint-disable-next-line no-console
             console.error(
               '[RLS] profiles policy recursion detected (42P17) - ensure migration 20250216_fix_profiles_rls_no_recursion.sql is applied'
             );
-            // Don't throw - return null to allow UI to continue
-            // The migration should fix this, but we don't want to crash the app
+          } else {
+            // eslint-disable-next-line no-console
+            console.error('[SUPABASE ERROR][usersRepo.getById]', {
+              code: error.code,
+              message: error.message,
+              details: error.details,
+            });
           }
         }
+        return null;
+      }
+
+      // data === null means profile doesn't exist yet (expected during signup)
+      if (!data) {
         return null;
       }
       return rowToUser(data as ProfileRow);

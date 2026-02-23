@@ -164,7 +164,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLoading((prev) => ({ ...prev, ads: true }));
     setErrors((prev) => ({ ...prev, ads: null }));
     try {
-      let list: Awaited<ReturnType<typeof getAdsRepo>['list']> = [];
+      let list: Ad[] = [];
       if (useSupabase) {
         const r = await fetch('/api/ads/public', { cache: 'no-store' });
         if (r.ok) {

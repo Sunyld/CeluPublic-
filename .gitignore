@@ -10,6 +10,7 @@ node_modules
 dist
 dist-ssr
 *.local
+.next
 
 .vscode/*
 !.vscode/extensions.json
@@ -21,3 +22,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.env*
+
+# Legacy Pages Router (legacy, kept as backup, not used in build)
+_legacy_pages

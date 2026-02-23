@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
@@ -13,7 +13,7 @@ import { BrandLogo } from '@/components/BrandLogo';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { trackEvent } from '@/lib/analytics';
 
-export default function Login() {
+function LoginForm() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -170,5 +170,13 @@ export default function Login() {
                 </Card>
             </div>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<div className="flex min-h-[80vh] items-center justify-center bg-muted/50">A carregar...</div>}>
+            <LoginForm />
+        </Suspense>
     );
 }

@@ -1,8 +1,8 @@
 import type { SettingsRepository } from '../settingsRepo';
-import { WHATSAPP_ADMIN, LIMITS } from '@/lib/constants';
+import { CONTACT_INFO, LIMITS } from '@/lib/constants';
 
 const FALLBACK_PUBLIC: Record<string, unknown> = {
-  admin_whatsapp: { number: WHATSAPP_ADMIN },
+  admin_whatsapp: { number: CONTACT_INFO.WHATSAPP_RAW },
   activation_fee_mzn: { amount: LIMITS.ACTIVATION_FEE_MT },
 };
 

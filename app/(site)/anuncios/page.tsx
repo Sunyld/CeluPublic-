@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { Suspense, useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
@@ -26,7 +26,7 @@ function buildSearch(
     return s ? `?${s}` : '';
 }
 
-export default function AdListingPage() {
+function AdListingContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const [loading, setLoading] = useState(true);
@@ -169,5 +169,13 @@ export default function AdListingPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function AdListingPage() {
+    return (
+        <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-12"><Skeleton className="h-64 w-full" /></div>}>
+            <AdListingContent />
+        </Suspense>
     );
 }

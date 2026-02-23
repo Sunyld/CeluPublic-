@@ -36,6 +36,10 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "_legacy_pages",
+    "src",
+    "vite.config.ts",
+    "index.html"
   ]
 }

@@ -109,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Prova singleton no boot (gerar attemptId apenas uma vez)
   const currentAttemptIdRef = useRef<string>(generateAuthAttemptId());
-  if (import.meta.env.DEV) {
+  if (process.env.NODE_ENV === 'development') {
     logAuthEvent(currentAttemptIdRef.current, 'SESSION_BEFORE', {
       clientId: getSupabaseClientId(),
       useSupabase,
