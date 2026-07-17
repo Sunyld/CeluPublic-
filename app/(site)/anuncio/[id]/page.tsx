@@ -88,8 +88,8 @@ export default function AdDetailPage({ params }: { params: Promise<{ id: string 
     const images = ad?.images?.length ? ad.images : [PLACEHOLDER_IMAGE];
     const currentImage = images[galleryIndex];
     const { url: resolvedCurrentImage } = useStorageImage('ad-images', currentImage);
-    const hasWhatsApp = !!ad?.whatsapp?.trim();
-    const whatsappUrl = ad && hasWhatsApp ? buildWhatsAppUrl(ad, category?.name) : '#';
+    const whatsappUrl = ad ? buildWhatsAppUrl(ad, category?.name) : null;
+    const hasWhatsApp = !!whatsappUrl;
     const priceStr =
         ad?.priceOnRequest || ad?.price == null ? 'Sob consulta' : `${ad.price} MT`;
 

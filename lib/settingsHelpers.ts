@@ -1,9 +1,11 @@
 import { CONTACT_INFO, LIMITS } from '@/lib/constants';
+import { normalizeMozambiquePhone } from '@/lib/whatsapp';
 
 /** Extract admin WhatsApp number from publicSettings (Supabase or local fallback). */
 export function getAdminWhatsapp(publicSettings: Record<string, unknown>): string {
   const v = publicSettings.admin_whatsapp as { number?: string } | undefined;
-  return v?.number?.replace(/\D/g, '') || CONTACT_INFO.WHATSAPP_RAW;
+  const normalized = v?.number ? normalizeMozambiquePhone(v.number) : null;
+  return normalized || CONTACT_INFO.WHATSAPP_RAW;
 }
 
 /** Extract activation fee in MT from publicSettings. */

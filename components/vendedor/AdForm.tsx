@@ -8,6 +8,7 @@ import { useToast } from '@/context/ToastContext';
 import { LIMITS, PLACEHOLDER_IMAGE, CIDADES_POR_PROVINCIA, PROVINCIAS_MOCAMBIQUE } from '@/lib/constants';
 import { compressImage } from '@/lib/imageCompression';
 import { getMessageForError, withTimeout } from '@/lib/errors';
+import { normalizeMozambiquePhone } from '@/lib/whatsapp';
 import type { Ad, AdType } from '@/types';
 import { AppButton } from '@/components/ui/app-button';
 import { Label } from '@/components/ui/label';
@@ -105,6 +106,13 @@ export function AdForm({ initialAd, defaultType = 'product' }: AdFormProps) {
         setError('');
         if (!user) return;
 
+        // Validate WhatsApp number
+        const normalizedWhatsapp = normalizeMozambiquePhone(whatsapp);
+        if (!normalizedWhatsapp) {
+            setError('Número de WhatsApp inválido. Por favor, use um número moçambicano válido (ex: 84 123 4567 ou 258841234567).');
+            return;
+        }
+
         const products = getAdsByUser(user.id).filter((a) => a.type === 'product');
         const services = getAdsByUser(user.id).filter((a) => a.type === 'service');
 
@@ -143,7 +151,7 @@ export function AdForm({ initialAd, defaultType = 'product' }: AdFormProps) {
                     city: location.trim(),
                     neighborhood: neighborhood.trim() || undefined,
                     categoryId,
-                    whatsapp: whatsapp.replace(/\D/g, ''),
+                    whatsapp: normalizedWhatsapp,
                     type,
                     status: initialAd.status,
                     images: allImages,
@@ -176,7 +184,7 @@ export function AdForm({ initialAd, defaultType = 'product' }: AdFormProps) {
                     city: location.trim(),
                     neighborhood: neighborhood.trim() || undefined,
                     categoryId,
-                    whatsapp: whatsapp.replace(/\D/g, ''),
+                    whatsapp: normalizedWhatsapp,
                     type,
                     images: imagesToSend,
                 };

@@ -65,7 +65,7 @@ export function AdCard({ ad, showLike: _showLike = true }: AdCardProps) {
       });
   };
 
-  const whatsappUrl = ad.whatsapp?.trim() ? buildWhatsAppUrl(ad, category?.name) : undefined;
+  const whatsappUrl = buildWhatsAppUrl(ad, category?.name) ?? undefined;
   const price =
     ad.priceOnRequest || ad.price == null ? 'Sob consulta' : `${ad.price} MT`;
 
