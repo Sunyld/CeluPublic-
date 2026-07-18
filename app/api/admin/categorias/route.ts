@@ -5,6 +5,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import { CategoryIconService } from '@/lib/categoryIconService'
 
 async function ensureAdmin(supabase: import('@supabase/supabase-js').SupabaseClient, userId: string) {
     const { data } = await supabase.rpc('is_admin', { uid: userId })
@@ -71,7 +72,13 @@ export async function POST(request: Request) {
         const body = await request.json().catch(() => ({}))
         const name = (body?.name ?? '').toString().trim()
         const slug = (body?.slug ?? name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')).toString().trim()
-        const icon = body?.icon ?? null
+        let icon = body?.icon ?? null
+        
+        // If no icon provided, use CategoryIconService to suggest one
+        if (!icon) {
+            const suggestion = CategoryIconService.suggestIcon(name)
+            icon = suggestion.name
+        }
 
         if (!name || !slug) {
             return NextResponse.json(

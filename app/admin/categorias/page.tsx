@@ -8,12 +8,106 @@ import { AppButton } from '@/components/ui/app-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
-import { Layers, Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { 
+  Layers, Plus, Pencil, Trash2, Loader2, Smartphone, Shirt, Car, Home, Laptop, Briefcase, Heart, Trophy, Tag, ShoppingCart, Utensils, Gamepad2, Music, Camera, Zap, Droplet, Star, Sparkles, Globe, TrendingUp, Award,
+  Bookmark, Book, Activity, AlertCircle, Anchor, Building2, Archive, ArrowDownCircle, ArrowUpCircle, ArrowLeftCircle, ArrowRightCircle, AtSign, Axe,
+  BadgeCheck, BadgeDollarSign, BadgeHelp, BadgeInfo, BadgePercent, BadgePlus, BadgeX, Banknote, Banana, Battery, Bed, Bell, Bike, Bird, Bluetooth, Ship
+} from 'lucide-react';
 import type { Category } from '@/types';
 import { withTimeout } from '@/lib/errors';
 
 const USE_SUPABASE = process.env.NEXT_PUBLIC_USE_SUPABASE === 'true';
 const FETCH_TIMEOUT_MS = 12000;
+
+// Available icons for selection
+const AVAILABLE_ICONS = [
+  { name: 'smartphone', icon: Smartphone },
+  { name: 'shirt', icon: Shirt },
+  { name: 'car', icon: Car },
+  { name: 'home', icon: Home },
+  { name: 'laptop', icon: Laptop },
+  { name: 'briefcase', icon: Briefcase },
+  { name: 'heart', icon: Heart },
+  { name: 'trophy', icon: Trophy },
+  { name: 'tag', icon: Tag },
+  { name: 'shopping-cart', icon: ShoppingCart },
+  { name: 'utensils', icon: Utensils },
+  { name: 'gamepad2', icon: Gamepad2 },
+  { name: 'music', icon: Music },
+  { name: 'camera', icon: Camera },
+  { name: 'zap', icon: Zap },
+  { name: 'droplet', icon: Droplet },
+  { name: 'star', icon: Star },
+  { name: 'sparkles', icon: Sparkles },
+  { name: 'globe', icon: Globe },
+  { name: 'trending-up', icon: TrendingUp },
+  { name: 'award', icon: Award },
+  { name: 'bookmark', icon: Bookmark },
+  { name: 'book', icon: Book },
+  { name: 'activity', icon: Activity },
+  { name: 'alert-circle', icon: AlertCircle },
+  { name: 'anchor', icon: Anchor },
+  { name: 'building2', icon: Building2 },
+  { name: 'archive', icon: Archive },
+  { name: 'arrow-down-circle', icon: ArrowDownCircle },
+  { name: 'arrow-up-circle', icon: ArrowUpCircle },
+  { name: 'arrow-left-circle', icon: ArrowLeftCircle },
+  { name: 'arrow-right-circle', icon: ArrowRightCircle },
+  { name: 'at-sign', icon: AtSign },
+  { name: 'axe', icon: Axe },
+  { name: 'badge-check', icon: BadgeCheck },
+  { name: 'badge-dollar-sign', icon: BadgeDollarSign },
+  { name: 'badge-help', icon: BadgeHelp },
+  { name: 'badge-info', icon: BadgeInfo },
+  { name: 'badge-percent', icon: BadgePercent },
+  { name: 'badge-plus', icon: BadgePlus },
+  { name: 'badge-x', icon: BadgeX },
+  { name: 'banknote', icon: Banknote },
+  { name: 'banana', icon: Banana },
+  { name: 'battery', icon: Battery },
+  { name: 'bed', icon: Bed },
+  { name: 'bell', icon: Bell },
+  { name: 'bike', icon: Bike },
+  { name: 'bird', icon: Bird },
+  { name: 'bluetooth', icon: Bluetooth },
+  { name: 'ship', icon: Ship },
+];
+
+// Icon picker component
+function IconPicker({ 
+  value, 
+  onChange 
+}: { 
+  value?: string; 
+  onChange: (icon: string) => void 
+}) {
+  const selectedIcon = AVAILABLE_ICONS.find(i => i.name === value);
+  const SelectedIconComponent = selectedIcon?.icon || Tag;
+  
+  return (
+    <div className="space-y-2 min-w-[200px]">
+      <Label className="text-[10px] uppercase font-bold text-muted-foreground">Ícone</Label>
+      <div className="relative">
+        <div className="flex items-center gap-2 p-2 border rounded-md bg-background">
+          <SelectedIconComponent className="h-5 w-5 text-foreground" />
+          <span className="text-sm text-muted-foreground flex-1">{value || 'Selecionar ícone'}</span>
+        </div>
+        <div className="absolute z-50 mt-2 grid grid-cols-5 gap-2 p-2 border rounded-md bg-background shadow-lg">
+          {AVAILABLE_ICONS.map(({ name, icon: IconComponent }) => (
+            <button
+              key={name}
+              type="button"
+              onClick={() => onChange(name)}
+              className={`p-2 rounded-md transition-colors ${value === name ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`}
+            >
+              <IconComponent className="h-5 w-5" />
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function slugFromName(name: string): string {
     return name
@@ -33,11 +127,14 @@ export default function AdminCategoriesPage() {
     const showToast = useToast().showToast;
     const [newName, setNewName] = useState('');
     const [newSlug, setNewSlug] = useState('');
+    const [newIcon, setNewIcon] = useState<string | undefined>('tag');
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editName, setEditName] = useState('');
     const [editSlug, setEditSlug] = useState('');
+    const [editIcon, setEditIcon] = useState<string | undefined>('tag');
     const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
     const [submitting, setSubmitting] = useState(false);
+
     const loadCategories = useCallback(async () => {
         try {
             const r = await withTimeout(fetch('/api/admin/categorias', { cache: 'no-store' }), FETCH_TIMEOUT_MS, 'Carregar categorias');
@@ -73,7 +170,7 @@ export default function AdminCategoriesPage() {
                 fetch('/api/admin/categorias', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, slug }),
+                    body: JSON.stringify({ name, slug, icon: newIcon }),
                     cache: 'no-store',
                 }),
                 FETCH_TIMEOUT_MS,
@@ -87,6 +184,7 @@ export default function AdminCategoriesPage() {
             setCategories((prev) => [...prev, rowToCategory(created)]);
             setNewName('');
             setNewSlug('');
+            setNewIcon('tag');
             showToast({ variant: 'success', description: 'Categoria criada.' });
         } catch (e) {
             showToast({ variant: 'error', description: e instanceof Error ? e.message : 'Erro ao criar.' });
@@ -99,6 +197,7 @@ export default function AdminCategoriesPage() {
         setEditingId(c.id);
         setEditName(c.name);
         setEditSlug(c.slug);
+        setEditIcon(c.icon || 'tag');
     };
 
     const saveEdit = async () => {
@@ -113,7 +212,7 @@ export default function AdminCategoriesPage() {
                 fetch(`/api/admin/categorias/${editingId}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, slug }),
+                    body: JSON.stringify({ name, slug, icon: editIcon }),
                     cache: 'no-store',
                 }),
                 FETCH_TIMEOUT_MS,
@@ -210,6 +309,10 @@ export default function AdminCategoriesPage() {
                                 placeholder="Ex: eletronica"
                             />
                         </div>
+                        <IconPicker 
+                            value={newIcon}
+                            onChange={setNewIcon}
+                        />
                         <AppButton onClick={handleAdd} disabled={!newName.trim() || submitting} className="gap-2">
                             {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
                             Adicionar
@@ -230,63 +333,70 @@ export default function AdminCategoriesPage() {
                         <p className="py-8 text-center text-muted-foreground">Nenhuma categoria configurada.</p>
                     ) : (
                         <div className="grid gap-2">
-                            {withCount.map((c) => (
-                                <div
-                                    key={c.id}
-                                    className="flex flex-wrap items-center justify-between gap-4 rounded-xl border p-4 transition-colors hover:bg-muted/30"
-                                >
-                                    {editingId === c.id ? (
-                                        <>
-                                            <div className="flex flex-wrap items-center gap-4 flex-1">
-                                                <div className="space-y-1">
-                                                    <Label className="text-[10px] uppercase font-bold text-muted-foreground">Nome</Label>
-                                                    <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="h-9 w-48" />
+                            {withCount.map((c) => {
+                                const CatIcon = AVAILABLE_ICONS.find(i => i.name === c.icon)?.icon || Tag;
+                                return (
+                                    <div
+                                        key={c.id}
+                                        className="flex flex-wrap items-center justify-between gap-4 rounded-xl border p-4 transition-colors hover:bg-muted/30"
+                                    >
+                                        {editingId === c.id ? (
+                                            <>
+                                                <div className="flex flex-wrap items-center gap-4 flex-1">
+                                                    <div className="space-y-1">
+                                                        <Label className="text-[10px] uppercase font-bold text-muted-foreground">Nome</Label>
+                                                        <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="h-9 w-48" />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <Label className="text-[10px] uppercase font-bold text-muted-foreground">Slug</Label>
+                                                        <Input value={editSlug} onChange={(e) => setEditSlug(e.target.value)} className="h-9 w-40" />
+                                                    </div>
+                                                    <IconPicker value={editIcon} onChange={setEditIcon} />
                                                 </div>
-                                                <div className="space-y-1">
-                                                    <Label className="text-[10px] uppercase font-bold text-muted-foreground">Slug</Label>
-                                                    <Input value={editSlug} onChange={(e) => setEditSlug(e.target.value)} className="h-9 w-40" />
-                                                </div>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <AppButton size="sm" onClick={saveEdit} disabled={submitting}>
-                                                    {submitting ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
-                                                    Guardar
-                                                </AppButton>
-                                                <AppButton size="sm" variant="outline" onClick={() => setEditingId(null)}>
-                                                    Cancelar
-                                                </AppButton>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div className="flex-1">
-                                                <h4 className="font-semibold">{c.name}</h4>
-                                                <p className="text-xs text-muted-foreground">slug: {c.slug} · {c.adCount} anúncios ativos</p>
-                                            </div>
-                                            {USE_SUPABASE && (
-                                                <div className="flex items-center gap-1">
-                                                    <AppButton
-                                                        size="icon"
-                                                        variant="ghost"
-                                                        onClick={() => startEdit(c)}
-                                                        className="h-8 w-8 text-muted-foreground"
-                                                    >
-                                                        <Pencil className="h-4 w-4" />
+                                                <div className="flex gap-2">
+                                                    <AppButton size="sm" onClick={saveEdit} disabled={submitting}>
+                                                        {submitting ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
+                                                        Guardar
                                                     </AppButton>
-                                                    <AppButton
-                                                        size="icon"
-                                                        variant="ghost"
-                                                        className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                                                        onClick={() => setCategoryToDelete(c)}
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
+                                                    <AppButton size="sm" variant="outline" onClick={() => setEditingId(null)}>
+                                                        Cancelar
                                                     </AppButton>
                                                 </div>
-                                            )}
-                                        </>
-                                    )}
-                                </div>
-                            ))}
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="flex items-center gap-3 flex-1">
+                                                    <CatIcon className="h-6 w-6 text-primary" />
+                                                    <div>
+                                                        <h4 className="font-semibold">{c.name}</h4>
+                                                        <p className="text-xs text-muted-foreground">slug: {c.slug} · {c.adCount} anúncios ativos</p>
+                                                    </div>
+                                                </div>
+                                                {USE_SUPABASE && (
+                                                    <div className="flex items-center gap-1">
+                                                        <AppButton
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            onClick={() => startEdit(c)}
+                                                            className="h-8 w-8 text-muted-foreground"
+                                                        >
+                                                            <Pencil className="h-4 w-4" />
+                                                        </AppButton>
+                                                        <AppButton
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                                            onClick={() => setCategoryToDelete(c)}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </AppButton>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
                     )}
                 </CardContent>

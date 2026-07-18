@@ -1,6 +1,7 @@
 import type { Category } from '@/types';
 import type { CategoriesRepository } from '../categoriesRepo';
 import { storage } from '@/lib/storage';
+import { CategoryIconService } from '@/lib/categoryIconService';
 
 export const categoriesRepo: CategoriesRepository = {
   async list() {
@@ -8,8 +9,17 @@ export const categoriesRepo: CategoriesRepository = {
   },
 
   async create(data) {
+    let icon = data.icon;
+    
+    // If no icon provided, use CategoryIconService to suggest one
+    if (!icon) {
+      const suggestion = CategoryIconService.suggestIcon(data.name);
+      icon = suggestion.name;
+    }
+    
     const category: Category = {
       ...data,
+      icon,
       id: crypto.randomUUID(),
     };
     const categories = storage.getCategories();

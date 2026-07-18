@@ -2,6 +2,7 @@ import type { Category } from '@/types';
 import type { CategoriesRepository } from '../categoriesRepo';
 import { getSupabase } from '@/lib/supabaseClient';
 import { AppError, ERROR_CODES } from '@/lib/errors';
+import { CategoryIconService } from '@/lib/categoryIconService';
 
 type CategoryRow = {
   id: string;
@@ -52,10 +53,18 @@ export const categoriesRepoSupabase: CategoriesRepository = {
     const supabase = getSupabase();
     if (!supabase) throw new AppError(ERROR_CODES.UNAUTHORIZED, 'Supabase not configured');
 
+    let icon = data.icon ?? null;
+    
+    // If no icon provided, use CategoryIconService to suggest one
+    if (!icon) {
+      const suggestion = CategoryIconService.suggestIcon(data.name);
+      icon = suggestion.name;
+    }
+
     const row = {
       name: data.name,
       slug: data.slug,
-      icon: data.icon ?? null,
+      icon,
     };
 
     const { data: inserted, error } = await supabase.from('categories').insert(row).select().single();
