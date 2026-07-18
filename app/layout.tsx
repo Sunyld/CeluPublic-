@@ -9,6 +9,9 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
     title: 'CeluPublic – Marketplace de Eletrônicos',
     description: 'Compre e venda celulares e eletrônicos em Moçambique.',
+    other: {
+        monetag: 'a0baaf6b88736b9af7ae429af8ee91bb',
+    },
 }
 
 export default function RootLayout({
