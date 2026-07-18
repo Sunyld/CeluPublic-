@@ -39,6 +39,7 @@ function rowToAd(
         whatsapp: r.whatsapp,
         images,
         likes: 0,
+        views: r.views as number,
         createdAt: r.created_at,
         updatedAt: r.updated_at,
     }
@@ -66,7 +67,7 @@ export async function GET(request: Request) {
             .from('ads')
             .select(`
                 id, owner_id, type, status, title, description, price_mzn, price_note,
-                province, city, neighborhood, category, whatsapp, created_at, updated_at
+                province, city, neighborhood, category, whatsapp, created_at, updated_at, views
             `)
             .order('updated_at', { ascending: false })
             .range(offset, offset + limit - 1)
@@ -102,6 +103,7 @@ export async function GET(request: Request) {
             whatsapp: string
             created_at: string
             updated_at: string
+            views: number
         }>
 
         let ownAds: typeof rows = []
@@ -110,7 +112,7 @@ export async function GET(request: Request) {
                 .from('ads')
                 .select(`
                     id, owner_id, type, status, title, description, price_mzn, price_note,
-                    province, city, neighborhood, category, whatsapp, created_at, updated_at
+                    province, city, neighborhood, category, whatsapp, created_at, updated_at, views
                 `)
                 .eq('owner_id', user.id)
             ownAds = (own ?? []) as typeof rows

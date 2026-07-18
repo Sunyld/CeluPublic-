@@ -83,6 +83,7 @@ export async function GET(
             whatsapp: adRow.whatsapp,
             images: images.length > 0 ? images : [],
             likes: 0,
+            views: adRow.views as number,
             createdAt: adRow.created_at,
             updatedAt: adRow.updated_at,
         }
