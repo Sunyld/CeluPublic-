@@ -31,14 +31,14 @@ export default function Home() {
     const safeBanners = banners ?? [];
 
     const pillItems = useMemo<CategoryPillItem[]>(() => {
-        const base: CategoryPillItem[] = [
-            { id: '', label: 'Todos' },
-            { id: 'product', label: 'Produtos' },
-            { id: 'service', label: 'Serviços' },
-        ];
-        const catPills = safeCategories.map((c) => ({ id: c.id, label: c.name }));
-        return [...base, ...catPills];
-    }, [safeCategories]);
+    const base: CategoryPillItem[] = [
+      { id: '', label: 'Todos' },
+      { id: 'product', label: 'Produtos' },
+      { id: 'service', label: 'Serviços' },
+    ];
+    const catPills = safeCategories.map((c) => ({ id: c.id, label: c.name, icon: c.icon }));
+    return [...base, ...catPills];
+  }, [safeCategories]);
 
     const publicAds = useMemo(() => {
         try {
