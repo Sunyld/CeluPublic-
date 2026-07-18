@@ -21,6 +21,9 @@ export default function RootLayout({
 }) {
     return (
         <html lang="pt" suppressHydrationWarning>
+            <head>
+                <script src="" data-zone="260994" async data-cfasync="false"></script>
+            </head>
             <body className={inter.className} suppressHydrationWarning>
                 <Providers>
                     {children}
