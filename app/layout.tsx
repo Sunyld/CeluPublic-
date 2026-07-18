@@ -37,6 +37,13 @@ export default function RootLayout({
                         __html: `(function(s){s.dataset.zone='11342682',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`
                     }}
                 />
+                <Script
+                    id="quge5-ad-script"
+                    src="https://quge5.com/88/tag.min.js"
+                    data-zone="261048"
+                    async
+                    strategy="afterInteractive"
+                />
             </body>
         </html>
     )
