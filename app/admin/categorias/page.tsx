@@ -10,8 +10,15 @@ import { Label } from '@/components/ui/label';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { 
   Layers, Plus, Pencil, Trash2, Loader2, Smartphone, Shirt, Car, Home, Laptop, Briefcase, Heart, Trophy, Tag, ShoppingCart, Utensils, Gamepad2, Music, Camera, Zap, Droplet, Star, Sparkles, Globe, TrendingUp, Award,
-  Bookmark, Book, Activity, AlertCircle, Anchor, Building2, Archive, ArrowDownCircle, ArrowUpCircle, ArrowLeftCircle, ArrowRightCircle, AtSign, Axe,
-  BadgeCheck, BadgeDollarSign, BadgeHelp, BadgeInfo, BadgePercent, BadgePlus, BadgeX, Banknote, Banana, Battery, Bed, Bell, Bike, Bird, Bluetooth, Ship
+  BookOpen, Watch, Headphones, Speaker, Tv, Monitor, Printer, Package, Truck, CreditCard, Gift, Users, User, MapPin, Phone, Mail, PackageCheck,
+  Cpu, Lightbulb, Lamp, Sofa, BedDouble, Armchair, Table, Backpack, Handbag, Wallet, 
+  Motorbike, Tablet, ShoppingBag, Store, DollarSign, Euro, Coins, Banknote, Coffee, Dumbbell, Activity, ChevronDown,
+  Flower, Footprints, Sparkle, Book, Music2, Flame, Droplets, Palette, Scissors,
+  Cake, IceCream, Pizza, UtensilsCrossed, ShoppingBasket, Sprout, Leaf,
+  Stethoscope, Syringe, Microscope,
+  PartyPopper,
+  HeartPulse,
+  BookHeart
 } from 'lucide-react';
 import type { Category } from '@/types';
 import { withTimeout } from '@/lib/errors';
@@ -19,58 +26,99 @@ import { withTimeout } from '@/lib/errors';
 const USE_SUPABASE = process.env.NEXT_PUBLIC_USE_SUPABASE === 'true';
 const FETCH_TIMEOUT_MS = 12000;
 
-// Available icons for selection
+// Available icons for selection (e-commerce focused)
 const AVAILABLE_ICONS = [
+  // Eletrônicos e Informática
   { name: 'smartphone', icon: Smartphone },
-  { name: 'shirt', icon: Shirt },
-  { name: 'car', icon: Car },
-  { name: 'home', icon: Home },
   { name: 'laptop', icon: Laptop },
-  { name: 'briefcase', icon: Briefcase },
-  { name: 'heart', icon: Heart },
-  { name: 'trophy', icon: Trophy },
-  { name: 'tag', icon: Tag },
-  { name: 'shopping-cart', icon: ShoppingCart },
-  { name: 'utensils', icon: Utensils },
-  { name: 'gamepad2', icon: Gamepad2 },
-  { name: 'music', icon: Music },
+  { name: 'tablet', icon: Tablet },
+  { name: 'tv', icon: Tv },
+  { name: 'headphones', icon: Headphones },
+  { name: 'speaker', icon: Speaker },
   { name: 'camera', icon: Camera },
-  { name: 'zap', icon: Zap },
+  { name: 'gamepad', icon: Gamepad2 },
+  { name: 'printer', icon: Printer },
+  { name: 'monitor', icon: Monitor },
+  { name: 'cpu', icon: Cpu },
+  { name: 'watch', icon: Watch },
+  // Moda, Calçados e Acessórios
+  { name: 'shirt', icon: Shirt },
+  { name: 'footprints', icon: Footprints },
+  { name: 'backpack', icon: Backpack },
+  { name: 'handbag', icon: Handbag },
+  { name: 'wallet', icon: Wallet },
+  // Casa e Móveis
+  { name: 'home', icon: Home },
+  { name: 'sofa', icon: Sofa },
+  { name: 'bed', icon: BedDouble },
+  { name: 'armchair', icon: Armchair },
+  { name: 'table', icon: Table },
+  { name: 'lamp', icon: Lamp },
+  { name: 'lightbulb', icon: Lightbulb },
+  // Automóveis e Transporte
+  { name: 'car', icon: Car },
+  { name: 'motorcycle', icon: Motorbike },
+  // Comida e Sobremesas
+  { name: 'utensils', icon: Utensils },
+  { name: 'utensils-crossed', icon: UtensilsCrossed },
+  { name: 'coffee', icon: Coffee },
+  { name: 'pizza', icon: Pizza },
+  { name: 'ice-cream', icon: IceCream },
+  { name: 'cake', icon: Cake },
+  // Saúde, Beleza e Material Médico
+  { name: 'heart', icon: Heart },
+  { name: 'heart-pulse', icon: HeartPulse },
   { name: 'droplet', icon: Droplet },
+  { name: 'droplets', icon: Droplets },
+  { name: 'palette', icon: Palette },
+  { name: 'comb', icon: Scissors },
+  { name: 'scissors', icon: Scissors },
+  { name: 'stethoscope', icon: Stethoscope },
+  { name: 'syringe', icon: Syringe },
+  { name: 'microscope', icon: Microscope },
+  // Esportes e Lazer
   { name: 'star', icon: Star },
-  { name: 'sparkles', icon: Sparkles },
-  { name: 'globe', icon: Globe },
-  { name: 'trending-up', icon: TrendingUp },
-  { name: 'award', icon: Award },
-  { name: 'bookmark', icon: Bookmark },
-  { name: 'book', icon: Book },
+  { name: 'trophy', icon: Trophy },
+  { name: 'dumbbell', icon: Dumbbell },
   { name: 'activity', icon: Activity },
-  { name: 'alert-circle', icon: AlertCircle },
-  { name: 'anchor', icon: Anchor },
-  { name: 'building2', icon: Building2 },
-  { name: 'archive', icon: Archive },
-  { name: 'arrow-down-circle', icon: ArrowDownCircle },
-  { name: 'arrow-up-circle', icon: ArrowUpCircle },
-  { name: 'arrow-left-circle', icon: ArrowLeftCircle },
-  { name: 'arrow-right-circle', icon: ArrowRightCircle },
-  { name: 'at-sign', icon: AtSign },
-  { name: 'axe', icon: Axe },
-  { name: 'badge-check', icon: BadgeCheck },
-  { name: 'badge-dollar-sign', icon: BadgeDollarSign },
-  { name: 'badge-help', icon: BadgeHelp },
-  { name: 'badge-info', icon: BadgeInfo },
-  { name: 'badge-percent', icon: BadgePercent },
-  { name: 'badge-plus', icon: BadgePlus },
-  { name: 'badge-x', icon: BadgeX },
+  { name: 'trending-up', icon: TrendingUp },
+  // Serviços e Negócios
+  { name: 'briefcase', icon: Briefcase },
+  { name: 'store', icon: Store },
+  { name: 'shopping-cart', icon: ShoppingCart },
+  { name: 'shopping-bag', icon: ShoppingBag },
+  { name: 'shopping-basket', icon: ShoppingBasket },
+  { name: 'package', icon: Package },
+  { name: 'package-check', icon: PackageCheck },
+  { name: 'truck', icon: Truck },
+  { name: 'credit-card', icon: CreditCard },
+  { name: 'dollar-sign', icon: DollarSign },
+  { name: 'euro', icon: Euro },
+  { name: 'coin', icon: Coins },
   { name: 'banknote', icon: Banknote },
-  { name: 'banana', icon: Banana },
-  { name: 'battery', icon: Battery },
-  { name: 'bed', icon: Bed },
-  { name: 'bell', icon: Bell },
-  { name: 'bike', icon: Bike },
-  { name: 'bird', icon: Bird },
-  { name: 'bluetooth', icon: Bluetooth },
-  { name: 'ship', icon: Ship },
+  // Buquês, Flores e Ornamentação
+  { name: 'flower', icon: Flower },
+  { name: 'leaf', icon: Leaf },
+  { name: 'sprout', icon: Sprout },
+  { name: 'sparkle', icon: Sparkle },
+  { name: 'sparkles', icon: Sparkles },
+  { name: 'flame', icon: Flame },
+  // Livros e Mídia
+  { name: 'book', icon: Book },
+  { name: 'book-open', icon: BookOpen },
+  { name: 'book-heart', icon: BookHeart },
+  { name: 'music', icon: Music },
+  { name: 'music-2', icon: Music2 },
+  // Serviços de Beleza, Dança e Festa
+  { name: 'party-popper', icon: PartyPopper },
+  // Outros
+  { name: 'tag', icon: Tag },
+  { name: 'gift', icon: Gift },
+  { name: 'users', icon: Users },
+  { name: 'user', icon: User },
+  { name: 'map-pin', icon: MapPin },
+  { name: 'phone', icon: Phone },
+  { name: 'mail', icon: Mail },
 ];
 
 // Icon picker component
@@ -81,29 +129,43 @@ function IconPicker({
   value?: string; 
   onChange: (icon: string) => void 
 }) {
+  const [isOpen, setIsOpen] = useState(false);
   const selectedIcon = AVAILABLE_ICONS.find(i => i.name === value);
   const SelectedIconComponent = selectedIcon?.icon || Tag;
+  
+  const handleIconSelect = (icon: string) => {
+    onChange(icon);
+    setIsOpen(false);
+  };
   
   return (
     <div className="space-y-2 min-w-[200px]">
       <Label className="text-[10px] uppercase font-bold text-muted-foreground">Ícone</Label>
       <div className="relative">
-        <div className="flex items-center gap-2 p-2 border rounded-md bg-background">
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center gap-2 p-2 border rounded-md bg-background w-full text-left"
+        >
           <SelectedIconComponent className="h-5 w-5 text-foreground" />
           <span className="text-sm text-muted-foreground flex-1">{value || 'Selecionar ícone'}</span>
-        </div>
-        <div className="absolute z-50 mt-2 grid grid-cols-5 gap-2 p-2 border rounded-md bg-background shadow-lg">
-          {AVAILABLE_ICONS.map(({ name, icon: IconComponent }) => (
-            <button
-              key={name}
-              type="button"
-              onClick={() => onChange(name)}
-              className={`p-2 rounded-md transition-colors ${value === name ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`}
-            >
-              <IconComponent className="h-5 w-5" />
-            </button>
-          ))}
-        </div>
+          <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        </button>
+        {isOpen && (
+          <div className="absolute z-50 mt-2 grid grid-cols-5 gap-2 p-2 border rounded-md bg-background shadow-lg max-h-60 overflow-y-auto">
+            {AVAILABLE_ICONS.map(({ name, icon: IconComponent }) => (
+              <button
+                key={name}
+                type="button"
+                onClick={() => handleIconSelect(name)}
+                className={`p-2 rounded-md transition-colors ${value === name ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`}
+                title={name}
+              >
+                <IconComponent className="h-5 w-5" />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
