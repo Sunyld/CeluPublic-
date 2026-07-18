@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import Script from 'next/script'
 import '@/styles/globals.css'
 import { Providers } from './providers'
 import { WelcomePopup } from '@/components/shared/WelcomePopup'
@@ -29,6 +30,13 @@ export default function RootLayout({
                     {children}
                     <WelcomePopup />
                 </Providers>
+                <Script
+                    id="nap5k-ad-script"
+                    strategy="afterInteractive"
+                    dangerouslySetInnerHTML={{
+                        __html: `(function(s){s.dataset.zone='11342682',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`
+                    }}
+                />
             </body>
         </html>
     )
