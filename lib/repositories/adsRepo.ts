@@ -6,6 +6,7 @@ export interface AdsRepository {
   create(ad: Omit<Ad, 'id' | 'createdAt' | 'updatedAt'>, options?: { bypassLimit?: boolean }): Promise<Ad>;
   update(id: string, data: Partial<Omit<Ad, 'id' | 'userId'>>): Promise<Ad | null>;
   delete(id: string): Promise<boolean>;
+  getMostViewed(options?: { limit?: number; offset?: number }): Promise<Ad[]>;
 }
 
 export { adsRepo } from './local/adsRepo.local';

@@ -45,6 +45,7 @@ export const adsRepo: AdsRepository = {
     const ad: Ad = {
       ...data,
       status,
+      views: 0,
       id: crypto.randomUUID(),
       createdAt: now,
       updatedAt: now,
@@ -75,5 +76,14 @@ export const adsRepo: AdsRepository = {
     storage.setAds(next);
     invalidatePrefix(CACHE_KEY);
     return true;
+  },
+
+  async getMostViewed(options) {
+    const ads = storage.getAds();
+    let result = ads.filter((a) => a.status === 'published');
+    result.sort((a, b) => b.views - a.views);
+    if (options?.offset) result = result.slice(options.offset);
+    if (options?.limit) result = result.slice(0, options.limit);
+    return result;
   },
 };
