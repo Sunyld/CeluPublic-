@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { Package, Wrench } from 'lucide-react';
 import type { Ad } from '@/types';
 import { useApp } from '@/context/AppContext';
@@ -8,7 +8,6 @@ import { buildWhatsAppUrl } from '@/lib/whatsapp';
 import { getClicksRepo } from '@/lib/repositories/getClicksRepo';
 import { getLikesRepo } from '@/lib/repositories/getLikesRepo';
 import { invalidateLikeCountsCache } from '@/lib/cachedData';
-import { LoginToLikeDialog } from '@/components/shared/LoginToLikeDialog';
 import { trackEvent } from '@/lib/analytics';
 import { Badge } from '@/components/ui/badge';
 import { MarketplaceAdCard } from '@/components/marketplace/ad-card';
@@ -33,7 +32,6 @@ export function AdCard({ ad, showLike: _showLike = true }: AdCardProps) {
   const imageUrl = ad.images?.[0] || PLACEHOLDER_IMAGE;
   const { url: resolvedImageUrl } = useStorageImage('ad-images', imageUrl);
   const isLiked = !!likedIds[ad.id];
-  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
 
   const handleWhatsAppClick = () => {
     const now = Date.now();
@@ -46,23 +44,21 @@ export function AdCard({ ad, showLike: _showLike = true }: AdCardProps) {
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!user) {
-      setLoginDialogOpen(true);
-      return;
-    }
     const optimisticNext = !isLiked;
     toggleLike(ad.id);
-    getLikesRepo()
-      .toggleLike(ad.id, user.id)
-      .then((liked) => {
-        if (liked !== optimisticNext) {
+    if (user) {
+      getLikesRepo()
+        .toggleLike(ad.id, user.id)
+        .then((liked) => {
+          if (liked !== optimisticNext) {
+            toggleLike(ad.id);
+          }
+          invalidateLikeCountsCache();
+        })
+        .catch(() => {
           toggleLike(ad.id);
-        }
-        invalidateLikeCountsCache();
-      })
-      .catch(() => {
-        toggleLike(ad.id);
-      });
+        });
+    }
   };
 
   const whatsappUrl = buildWhatsAppUrl(ad, category?.name) ?? undefined;
@@ -84,30 +80,22 @@ export function AdCard({ ad, showLike: _showLike = true }: AdCardProps) {
   );
 
   return (
-    <>
-      <MarketplaceAdCard
-        title={ad.title}
-        price={price}
-        image={resolvedImageUrl || imageUrl}
-        imageAlt={ad.title}
-        badges={badges}
-        location={ad.location}
-        likedCount={ad.likes}
-        isLiked={isLiked}
-        onLike={handleLike}
-        href={`/anuncio/${ad.id}`}
-        description={ad.description}
-        whatsappHref={whatsappUrl}
-        categoryLabel={category?.name}
-        onWhatsAppClick={handleWhatsAppClick}
-      />
-      <LoginToLikeDialog
-        open={loginDialogOpen}
-        onOpenChange={setLoginDialogOpen}
-        onLogin={() => {
-          window.location.href = '/entrar';
-        }}
-      />
-    </>
+    <MarketplaceAdCard
+      title={ad.title}
+      price={price}
+      image={resolvedImageUrl || imageUrl}
+      imageAlt={ad.title}
+      badges={badges}
+      location={ad.location}
+      likedCount={ad.likes}
+      isLiked={isLiked}
+      onLike={handleLike}
+      href={`/anuncio/${ad.id}`}
+      description={ad.description}
+      whatsappHref={whatsappUrl}
+      categoryLabel={category?.name}
+      onWhatsAppClick={handleWhatsAppClick}
+      viewCount={ad.views}
+    />
   );
 }

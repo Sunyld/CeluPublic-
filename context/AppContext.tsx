@@ -54,12 +54,14 @@ type AppContextValue = AppState & {
   setCategories: (categories: Category[] | ((prev: Category[]) => Category[])) => void;
   setBanners: (banners: Banner[] | ((prev: Banner[]) => Banner[])) => void;
   setUsers: (users: User[] | ((prev: User[]) => User[])) => void;
+  setLikedIds: (likedIds: Record<string, boolean> | ((prev: Record<string, boolean>) => Record<string, boolean>)) => void;
   refreshUsers: () => void;
   refreshAds: () => Promise<void>;
   refreshCategories: () => Promise<void>;
   refreshBanners: () => Promise<void>;
   refreshSettings: () => Promise<void>;
   toggleLike: (adId: string) => void;
+  incrementAdView: (adId: string) => void;
   getAdById: (id: string) => Ad | undefined;
   getCategoryById: (id: string) => Category | undefined;
   getAdsByUser: (userId: string) => Ad[];
@@ -131,6 +133,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setUsersState((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater;
       invalidatePublicAdsCache();
+      return next;
+    });
+  }, []);
+
+  const setLikedIds = useCallback((updater: Record<string, boolean> | ((prev: Record<string, boolean>) => Record<string, boolean>)) => {
+    setLikedIdsState((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
       return next;
     });
   }, []);
@@ -285,35 +294,60 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [refreshUsers, refreshAds, refreshCategories, refreshBanners, refreshSettings, useSupabase]);
 
+  // Helper functions for local likes
+  const getLocalLikes = useCallback(() => {
+    if (typeof window === 'undefined') return {};
+    try {
+      const raw = localStorage.getItem('CELU_LIKES_VISITOR');
+      if (!raw) return {};
+      return JSON.parse(raw);
+    } catch {
+      return {};
+    }
+  }, []);
+
+  const saveLocalLikes = useCallback((likes: Record<string, boolean>) => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem('CELU_LIKES_VISITOR', JSON.stringify(likes));
+    } catch {
+      // ignore
+    }
+  }, []);
+
   useEffect(() => {
-    if (users.length > 0) {
+    const loadLikes = async () => {
       const usersRepo = getUsersRepo();
       const currentId = usersRepo.getCurrentUserId?.();
-      // Carregamos likes do utilizador autenticado, se houver.
       if (currentId) {
-        getLikesRepo()
-          .getUserLikes(currentId)
-          .then((ids) => {
-            const map: Record<string, boolean> = {};
-            for (const id of ids) map[id] = true;
-            setLikedIdsState(map);
-          })
-          .catch((err: any) => {
-            // eslint-disable-next-line no-console
-            console.error('[DB] Failed to load user likes', err);
-            // Don't crash - just set empty likes
-            setLikedIdsState({});
-          });
+        // User is logged in - load from repo
+        try {
+          const ids = await getLikesRepo().getUserLikes(currentId);
+          const map: Record<string, boolean> = {};
+          for (const id of ids) map[id] = true;
+          setLikedIds(map);
+        } catch (err: any) {
+          // eslint-disable-next-line no-console
+          console.error('[DB] Failed to load user likes', err);
+          setLikedIds({});
+        }
       } else {
-        setLikedIdsState({});
+        // No user - load from local storage
+        setLikedIds(getLocalLikes());
       }
-    }
-  }, [useSupabase, users]);
+    };
+
+    void loadLikes();
+  }, [useSupabase, users, getLocalLikes, setLikedIds]);
 
   const toggleLike = useCallback((adId: string) => {
     const wasLiked = likedIds[adId];
-    setLikedIdsState((prev) => {
+    setLikedIds((prev) => {
       const next = { ...prev, [adId]: !prev[adId] };
+      // Save to local storage if no user
+      if (!getUsersRepo().getCurrentUserId?.()) {
+        saveLocalLikes(next);
+      }
       return next;
     });
     if (!useSupabase) {
@@ -327,7 +361,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return next;
       });
     }
-  }, [likedIds, useSupabase]);
+  }, [likedIds, useSupabase, saveLocalLikes]);
+
+  const incrementAdView = useCallback((adId: string) => {
+    setAdsState((prev) => {
+      const ad = prev.find((a) => a.id === adId);
+      if (!ad) return prev;
+      const next = prev.map((a) =>
+        a.id === adId ? { ...a, views: (a.views || 0) + 1 } : a
+      );
+      return next;
+    });
+  }, []);
 
   const getAdById = useCallback(
     (id: string) => ads.find((a) => a.id === id),
@@ -388,12 +433,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setCategories,
       setBanners,
       setUsers,
+      setLikedIds,
       refreshUsers,
       refreshAds,
       refreshCategories,
       refreshBanners,
       refreshSettings,
       toggleLike,
+      incrementAdView,
       getAdById,
       getCategoryById,
       getAdsByUser,
@@ -416,12 +463,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setCategories,
       setBanners,
       setUsers,
+      setLikedIds,
       refreshUsers,
       refreshAds,
       refreshCategories,
       refreshBanners,
       refreshSettings,
       toggleLike,
+      incrementAdView,
       getAdById,
       getCategoryById,
       getAdsByUser,

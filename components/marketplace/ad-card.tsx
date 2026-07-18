@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Heart, MessageCircle } from 'lucide-react';
+import { Heart, MessageCircle, Eye } from 'lucide-react';
 import { AppButton } from '@/components/ui/app-button';
 import { cn } from '@/lib/utils';
 
@@ -17,6 +17,7 @@ export interface MarketplaceAdCardProps {
   description?: string;
   whatsappHref?: string;
   categoryLabel?: string;
+  viewCount?: number;
   /** Called when WhatsApp CTA is clicked (before navigation). Use for conversion tracking. */
   onWhatsAppClick?: () => void;
 }
@@ -37,6 +38,7 @@ export function MarketplaceAdCard({
   href,
   whatsappHref,
   onWhatsAppClick,
+  viewCount,
 }: MarketplaceAdCardProps) {
   const canContact = hasValidWhatsApp(whatsappHref);
 
@@ -64,6 +66,12 @@ export function MarketplaceAdCard({
             aria-hidden
           />
         </AppButton>
+        {viewCount != null && (
+            <div className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-background/80 px-2 py-1 text-xs text-muted-foreground">
+                <Eye className="h-3 w-3" />
+                {viewCount}
+            </div>
+        )}
       </div>
       <div className="mt-4 flex min-w-0 flex-col items-center text-center">
         <Link
