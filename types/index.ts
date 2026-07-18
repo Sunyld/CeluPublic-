@@ -35,22 +35,12 @@ export interface Ad {
   whatsapp: string;
   type: AdType;
   likes: number;
-  views: number;
   userId: string;
   userName?: string;
   /** Lifecycle: draft (not public), published (public), hidden (not public). */
   status: AdStatus;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface AdView {
-  id: string;
-  adId: string;
-  visitorIdentifier: string;
-  ip?: string;
-  userAgent?: string;
-  createdAt: string;
 }
 
 export interface CategoryIconSuggestion {

@@ -26,7 +26,6 @@ type AdsRow = {
   neighborhood: string | null;
   category: string;
   whatsapp: string;
-  views: number;
   created_at: string;
   updated_at: string;
 };
@@ -60,7 +59,6 @@ function rowToAd(
     whatsapp: row.whatsapp,
     images,
     likes: 0,
-    views: row.views ?? 0,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -276,43 +274,6 @@ export const adsRepoSupabase: AdsRepository = {
       throw error;
     }
     return true;
-  },
-
-  async getMostViewed(options) {
-    const supabase = getSupabase();
-    if (!supabase) return [];
-
-    let query = supabase
-      .from('ads')
-      .select('*')
-      .eq('status', 'published')
-      .order('views', { ascending: false })
-      .order('updated_at', { ascending: false });
-
-    if (options?.limit) query = query.limit(options.limit);
-    if (options?.offset) query = query.range(options.offset, options.offset + (options.limit || 100) - 1);
-
-    const { data, error } = await query;
-
-    if (error) {
-      // eslint-disable-next-line no-console
-      console.error('[SUPABASE ERROR][adsRepo.getMostViewed]', error);
-      if (error.code === '42P17' || error.message?.includes('recursion')) {
-        return [];
-      }
-      if (error.code === 'PGRST116' || error.message?.includes('policy')) return [];
-      console.warn('[DB] adsRepo.getMostViewed error (non-fatal):', error.message);
-      return [];
-    }
-
-    const rows = (data ?? []) as AdsRow[];
-    const adIds = rows.map((r) => r.id);
-    const imagesMap = await fetchImagesForAds(supabase, adIds);
-
-    return rows.map((r) => {
-      const images = imagesMap.get(r.id) ?? [];
-      return rowToAd(r, images, undefined);
-    });
   },
 };
 

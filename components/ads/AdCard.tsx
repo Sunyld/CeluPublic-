@@ -95,7 +95,6 @@ export function AdCard({ ad, showLike: _showLike = true }: AdCardProps) {
       whatsappHref={whatsappUrl}
       categoryLabel={category?.name}
       onWhatsAppClick={handleWhatsAppClick}
-      viewCount={ad.views}
     />
   );
 }

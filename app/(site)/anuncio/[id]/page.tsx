@@ -37,12 +37,11 @@ import { getClicksRepo } from '@/lib/repositories/getClicksRepo';
 import { invalidateLikeCountsCache } from '@/lib/cachedData';
 import { LoginToLikeDialog } from '@/components/shared/LoginToLikeDialog';
 import { useStorageImage } from '@/hooks/useStorageImage';
-import { AdsViewService } from '@/lib/adsViewService';
 import type { Ad } from '@/types';
 
 export default function AdDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
-    const { getAdById, getCategoryById, toggleLike, likedIds, ads, users, publicSettings, incrementAdView } = useApp();
+    const { getAdById, getCategoryById, toggleLike, likedIds, ads, users, publicSettings } = useApp();
     const auth = useAuthOptional();
     const user = auth?.user ?? null;
     const [fetchedAd, setFetchedAd] = useState<Ad | null | undefined>(undefined);
@@ -95,32 +94,9 @@ export default function AdDetailPage({ params }: { params: Promise<{ id: string 
         ad?.priceOnRequest || ad?.price == null ? 'Sob consulta' : `${ad.price} MT`;
 
     useEffect(() => {
-    if (!ad || !ownerApproved || ad.status !== 'published') return;
-    trackEvent('ad_view', { adId: ad.id });
-
-    // Increment view count
-    const incrementView = async () => {
-      try {
-        const visitorIdentifier = AdsViewService.getVisitorIdentifier();
-        const counted = await AdsViewService.incrementView({
-          adId: ad.id,
-          visitorIdentifier,
-          ip: undefined, // We'll let the server handle IP if needed
-          userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
-        });
-
-        // Update the view count in state instantly if the view was counted
-        if (counted) {
-          incrementAdView(ad.id);
-        }
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error('Failed to increment view count:', err);
-      }
-    };
-
-    incrementView();
-  }, [ad, ownerApproved, incrementAdView]);
+        if (!ad || !ownerApproved || ad.status !== 'published') return;
+        trackEvent('ad_view', { adId: ad.id });
+    }, [ad, ownerApproved]);
 
     const handleWhatsAppClick = () => {
         if (!ad) return;

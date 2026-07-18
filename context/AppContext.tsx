@@ -61,7 +61,6 @@ type AppContextValue = AppState & {
   refreshBanners: () => Promise<void>;
   refreshSettings: () => Promise<void>;
   toggleLike: (adId: string) => void;
-  incrementAdView: (adId: string) => void;
   getAdById: (id: string) => Ad | undefined;
   getCategoryById: (id: string) => Category | undefined;
   getAdsByUser: (userId: string) => Ad[];
@@ -363,17 +362,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [likedIds, useSupabase, saveLocalLikes]);
 
-  const incrementAdView = useCallback((adId: string) => {
-    setAdsState((prev) => {
-      const ad = prev.find((a) => a.id === adId);
-      if (!ad) return prev;
-      const next = prev.map((a) =>
-        a.id === adId ? { ...a, views: (a.views || 0) + 1 } : a
-      );
-      return next;
-    });
-  }, []);
-
   const getAdById = useCallback(
     (id: string) => ads.find((a) => a.id === id),
     [ads]
@@ -440,7 +428,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       refreshBanners,
       refreshSettings,
       toggleLike,
-      incrementAdView,
       getAdById,
       getCategoryById,
       getAdsByUser,
@@ -470,7 +457,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       refreshBanners,
       refreshSettings,
       toggleLike,
-      incrementAdView,
       getAdById,
       getCategoryById,
       getAdsByUser,
